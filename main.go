@@ -68,7 +68,7 @@ func NewBody(x, y int32) Body {
 }
 
 func NewGame() Game {
-	applesSlice := make([]Point, 100)
+	applesSlice := make([]Point, 256)
 
 	// spawn first apple at the start
 	randx := rand.Intn(WIDTH-50) + 50
@@ -82,6 +82,10 @@ func NewGame() Game {
 }
 
 func (g *Game) SpawnApple() {
+	// too much apples
+	if g.appleLen == 256 {
+		return
+	}
 	randx := rand.Intn(WIDTH-50) + 50
 	randy := rand.Intn(HEIGHT-50) + 50
 
@@ -99,13 +103,31 @@ func (g Game) DrawApples(surface *sdl.Surface) {
 	}
 }
 
-func (g *Game) EatApple(idx uint, body *Body, direction Point) {
+func (g *Game) EatApple(idx int, body *Body, direction Point) {
 	g.appleLen -= 1
 	if g.appleLen > 0 {
 		last := g.apples[g.appleLen]
 		g.apples[idx] = last
 	}
 	body.AddOne(direction)
+}
+
+func (g Game) RectCollision(a, b Point, r int) bool {
+	half_r := int32(r / 2)
+	upperLeftA := Point{x: a.x - half_r, y: a.y - half_r}
+	lowerRightA := Point{x: a.x + half_r, y: a.y + half_r}
+	upperLeftB := Point{x: b.x - half_r, y: b.y - half_r}
+	lowerRightB := Point{x: b.x + half_r, y: b.y + half_r}
+	if upperLeftA.x > lowerRightB.x {
+		return false
+	}
+	if upperLeftA.y > lowerRightB.y {
+		return false
+	}
+	if lowerRightA.x >= upperLeftB.x && lowerRightA.y >= upperLeftB.y {
+		return true
+	}
+	return false
 }
 
 var (
@@ -183,7 +205,7 @@ func handleEvent(event sdl.Event) {
 func loop(surface *sdl.Surface) (loopTime uint64) {
 	// Get time at the start of the function
 	startTime := sdl.GetTicks64()
-	if rand.Float32() < 0.002 {
+	if rand.Float32() < 0.01 {
 		game.SpawnApple()
 	}
 
@@ -210,20 +232,20 @@ func loop(surface *sdl.Surface) (loopTime uint64) {
 		return 0
 	}
 
+	// check for collision with own body
+	for idx := 1; idx < body.len; idx++ {
+		if game.RectCollision(body.bodySlice[idx], head, 5) {
+			println("Game Over...")
+			running = false
+			return 0
+		}
+	}
+
+	// check for eaten apple
 	for idx := 0; idx < game.appleLen; idx++ {
 		apple := game.apples[idx]
-		upperLeftApple := Point{x: apple.x - 5, y: apple.y - 5}
-		lowerRightApple := Point{x: apple.x + 5, y: apple.y + 5}
-		upperLeftHead := Point{x: head.x - 5, y: head.y - 5}
-		lowerRightHead := Point{x: head.x + 5, y: head.y + 5}
-		if upperLeftApple.x > lowerRightHead.x {
-			continue
-		}
-		if upperLeftApple.y > lowerRightHead.y {
-			continue
-		}
-		if lowerRightApple.x >= upperLeftHead.x && lowerRightApple.y >= upperLeftHead.y {
-			game.EatApple(uint(idx), &body, direction)
+		if game.RectCollision(apple, head, 10) {
+			game.EatApple(idx, &body, direction)
 		}
 	}
 
