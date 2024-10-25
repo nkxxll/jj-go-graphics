@@ -69,9 +69,15 @@ func NewBody(x, y int32) Body {
 
 func NewGame() Game {
 	applesSlice := make([]Point, 100)
+
+	// spawn first apple at the start
+	randx := rand.Intn(WIDTH-50) + 50
+	randy := rand.Intn(HEIGHT-50) + 50
+	applesSlice[0] = Point{x: int32(randx), y: int32(randy)}
+
 	return Game{
 		apples:   applesSlice,
-		appleLen: 0,
+		appleLen: 1,
 	}
 }
 
