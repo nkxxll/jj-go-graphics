@@ -16,7 +16,7 @@ type Point struct {
 
 type Game interface {
 	Loop(*sdl.Surface, *bool) uint64
-	HandleFunc(sdl.Event)
+	HandleEvent(sdl.Event, *bool) string
 }
 
 func NewPoint(x, y int32) Point {

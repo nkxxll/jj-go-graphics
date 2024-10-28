@@ -12,8 +12,9 @@ side.
 
 ## TODO
 
-- [ ] border collision and loss
-- [ ] spawning apples and increasing length of snake
+- [x] border collision and loss
+- [x] spawning apples and increasing length of snake
+- [ ] make two stages -> startscreen & game screens
 
 ## Snake Game
 

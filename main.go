@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	game    = games.NewSnakeGame()
-	running = true
+	game    games.Game = games.NewStartScreen()
+	running            = true
 )
 
 func main() {
@@ -33,7 +33,13 @@ func main() {
 	// this loop holds the control over the window
 	for running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			game.HandleEvent(event, &running)
+			switch t := game.(type) {
+			case *games.StartScreen:
+				gameName := game.HandleEvent(event, &running)
+				if gameName == "snake" {
+					game = games.NewSnakeGame()
+				}
+			}
 		}
 
 		loopTime := game.Loop(surface, &running)
