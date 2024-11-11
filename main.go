@@ -62,6 +62,11 @@ func main() {
 				game = games.NewSnakeGame()
 				gameRunning = true
 				nextGame = ""
+				break
+			case "Planet":
+				game = games.NewPlanetSym()
+				gameRunning = true
+				nextGame = ""
 			}
 
 			loopTime := startScreen.Loop(surface, &running)
