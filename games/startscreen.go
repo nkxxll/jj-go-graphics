@@ -74,7 +74,7 @@ func (s StartScreen) HandleEvent(event sdl.Event, running *bool) string {
 }
 
 func NewStartScreen() StartScreen {
-	menues := []Menu{NewMenu(0, "Snake"), NewMenu(1, "Planet")}
+	menues := []Menu{NewMenu(0, "Snake"), NewMenu(1, "Planet"), NewMenu(2, "Space")}
 	tiles := len(menues)
 	return StartScreen{
 		menues:     menues,

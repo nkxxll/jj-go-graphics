@@ -15,6 +15,7 @@ side.
 - [x] border collision and loss
 - [x] spawning apples and increasing length of snake
 - [ ] make two stages -> startscreen & game screens
+- [ ] switch from start to game and from game to start
 
 ## Snake Game
 

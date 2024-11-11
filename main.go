@@ -7,8 +7,11 @@ import (
 )
 
 var (
-	game    games.Game = games.NewStartScreen()
-	running            = true
+	startScreen = games.NewStartScreen()
+	nextGame    = ""
+	gameRunning = false
+	game        games.Game
+	running     = true
 )
 
 func main() {
@@ -32,26 +35,46 @@ func main() {
 	// this is the upper game loop that renders the game
 	// this loop holds the control over the window
 	for running {
-		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			switch t := game.(type) {
-			case *games.StartScreen:
-				gameName := game.HandleEvent(event, &running)
-				if gameName == "snake" {
-					game = games.NewSnakeGame()
+		if gameRunning {
+			for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+				game.HandleEvent(event, &running)
+				if running == false {
+					gameRunning = false
 				}
 			}
-		}
+			loopTime := game.Loop(surface, &gameRunning)
+			window.UpdateSurface()
 
-		loopTime := game.Loop(surface, &running)
-		window.UpdateSurface()
+			delay := (1000 / games.FRAMERATE) - loopTime
+			if delay > 4_294_967_295 {
+				println("Quitting..Error delay bigger than 32 bit uint")
+				running = false
+				continue
+			}
+			// NOTE: this is weird
+			sdl.Delay(uint32(delay))
+		} else {
+			for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+				nextGame = startScreen.HandleEvent(event, &running)
+			}
+			switch nextGame {
+			case "Snake":
+				game = games.NewSnakeGame()
+				gameRunning = true
+				nextGame = ""
+			}
 
-		delay := (1000 / games.FRAMERATE) - loopTime
-		if delay > 4_294_967_295 {
-			println("Quitting..Error delay bigger than 32 bit uint")
-			running = false
-			continue
+			loopTime := startScreen.Loop(surface, &running)
+			window.UpdateSurface()
+
+			delay := (1000 / games.FRAMERATE) - loopTime
+			if delay > 4_294_967_295 {
+				println("Quitting..Error delay bigger than 32 bit uint")
+				running = false
+				continue
+			}
+			// NOTE: this is weird
+			sdl.Delay(uint32(delay))
 		}
-		// NOTE: this is weird
-		sdl.Delay(uint32(delay))
 	}
 }

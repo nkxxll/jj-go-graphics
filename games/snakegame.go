@@ -72,7 +72,7 @@ func NewSnakeBody(x, y int32) SnakeBody {
 	}
 }
 
-func NewSnakeGame() SnakeGame {
+func NewSnakeGame() *SnakeGame {
 	applesSlice := make([]Point, 256)
 
 	// spawn first apple at the start
@@ -82,7 +82,7 @@ func NewSnakeGame() SnakeGame {
 
 	playerPos := NewPoint((WIDTH / 2), int32(HEIGHT/2))
 
-	return SnakeGame{
+	return &SnakeGame{
 		apples:    applesSlice,
 		appleLen:  1,
 		Direction: NewPoint(0, 0),
@@ -121,7 +121,7 @@ func (g *SnakeGame) EatApple(idx int) {
 	g.Body.AddOne(g.Direction)
 }
 
-func (g *SnakeGame) HandleEvent(event sdl.Event, running *bool) string {
+func (g *SnakeGame) HandleEvent(event sdl.Event, running *bool) {
 	switch t := event.(type) {
 	case *sdl.QuitEvent: // NOTE: Please use `*sdl.QuitEvent` for `v0.4.x` (current version).
 		println("Quitting..")
@@ -131,26 +131,26 @@ func (g *SnakeGame) HandleEvent(event sdl.Event, running *bool) string {
 		if t.State == sdl.RELEASED {
 			if t.Keysym.Sym == sdl.K_LEFT || t.Keysym.Sym == sdl.K_h {
 				if g.Direction.X == 1 {
-					return ""
+					return
 				}
 				g.Direction.X = -1
 				g.Direction.Y = 0
 			} else if t.Keysym.Sym == sdl.K_RIGHT || t.Keysym.Sym == sdl.K_l {
 				if g.Direction.X == -1 {
-					return ""
+					return
 				}
 				g.Direction.X = 1
 				g.Direction.Y = 0
 			}
 			if t.Keysym.Sym == sdl.K_UP || t.Keysym.Sym == sdl.K_k {
 				if g.Direction.Y == 1 {
-					return ""
+					return
 				}
 				g.Direction.X = 0
 				g.Direction.Y = -1
 			} else if t.Keysym.Sym == sdl.K_DOWN || t.Keysym.Sym == sdl.K_j {
 				if g.Direction.Y == -1 {
-					return ""
+					return
 				}
 				g.Direction.X = 0
 				g.Direction.Y = 1
@@ -158,7 +158,7 @@ func (g *SnakeGame) HandleEvent(event sdl.Event, running *bool) string {
 		}
 		break
 	}
-	return ""
+	return
 }
 
 func (g *SnakeGame) CheckBodyCollision() bool {
