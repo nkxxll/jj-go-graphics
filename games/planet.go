@@ -12,7 +12,7 @@ const (
 )
 
 type PlanetSym struct {
-	planets []Planet
+	planets []*Planet
 }
 
 type circle struct {
@@ -21,11 +21,15 @@ type circle struct {
 }
 
 type Planet struct {
+	name  string
 	shape circle
 	rad   int
+	alpha float64
 	vel   float64
 	x     int
 	y     int
+	fixX  int
+	fixY  int
 }
 
 func (p Planet) Draw(surface *sdl.Surface) {
@@ -39,12 +43,14 @@ func (p Planet) Draw(surface *sdl.Surface) {
 }
 
 func (p *Planet) Update() {
-	alpha := math.Atan(float64(p.y) / float64(p.x))
-
-	alpha += p.vel
-	// fixme: bug here this does not work
-	p.x += int(float64(p.rad) * math.Cos(alpha))
-	p.y += int(float64(p.rad) * math.Sin(alpha))
+	p.alpha += p.vel
+	if p.alpha > (2 * math.Pi) {
+		p.alpha -= 2 * math.Pi
+	}
+	vectorX := float64(p.fixX) + float64(p.rad)*math.Cos(p.alpha)
+	vectorY := float64(p.fixY) + float64(p.rad)*math.Sin(p.alpha)
+	p.x = int(vectorX)
+	p.y = int(vectorY)
 }
 
 func newCircle(rad int, color sdl.Color) circle {
@@ -56,11 +62,15 @@ func newCircle(rad int, color sdl.Color) circle {
 
 func NewPlanet(name string, rad int, vel float64, shape circle) Planet {
 	return Planet{
+		name:  name,
 		shape: shape,
 		rad:   rad,
 		vel:   vel,
+		alpha: 0.1,
 		x:     MIDDLE_X,
 		y:     MIDDLE_Y - rad,
+		fixX:  MIDDLE_X,
+		fixY:  MIDDLE_Y,
 	}
 }
 
@@ -69,9 +79,9 @@ func NewPlanetSym() *PlanetSym {
 	sunShape := newCircle(20, sdl.Color{R: 0, G: 255, B: 255, A: 200})
 	earthShape := newCircle(10, sdl.Color{R: 0, G: 0, B: 255, A: 200})
 	sun := NewPlanet("Sun", 0, 0, sunShape)
-	earth := NewPlanet("Earth", 50, 20, earthShape)
+	earth := NewPlanet("Earth", 150, 0.05, earthShape)
 	return &PlanetSym{
-		planets: []Planet{sun, earth},
+		planets: []*Planet{&sun, &earth},
 	}
 }
 
